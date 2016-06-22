@@ -68,7 +68,6 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(final Boolean success) {
-        listener.onPostExecuteLoginTask();
         if (success) {
             listener.onSuccessLoginTask();
         } else {

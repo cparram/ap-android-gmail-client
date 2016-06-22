@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -53,20 +54,30 @@ public class LoginActivity extends AppCompatActivity {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-    public static final String USER_PREFERENCES = "USERPREFERENCES";
-    public static final String USER_EMAIL = "email";
-    public static final String USER_PASSWORD = "pass";
+    public static final String USER_PREFERENCES = "cl.aleph.gmailclient.user.preferences";
+    public static final String USER_EMAIL = "cl.aleph.gmailclient.user.preferences.email";
+    public static final String USER_PASSWORD = "cl.aleph.gmailclient.user.preferences.pass";
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private SharedPreferences userPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        userPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+        String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
+        String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
+
+        if (email != null && pass != null ){
+            Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(mainActivityIntent);
+        }
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -192,28 +203,27 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void onPostExecuteLoginTask() {
-        mAuthTask = null;
-        showProgress(false);
-    }
-
     public void onCancelledLoginTask() {
         mAuthTask = null;
         showProgress(false);
     }
 
     public void onSuccessLoginTask() {
-        SharedPreferences sharedpreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedpreferences.edit();
+        mAuthTask = null;
+        SharedPreferences.Editor editor = userPreferences.edit();
         editor.putString(USER_EMAIL, mEmailView.getText().toString());
-        editor.putString(USER_EMAIL, mPasswordView.getText().toString());
+        editor.putString(USER_PASSWORD, mPasswordView.getText().toString());
         editor.commit();
 
-        // TODO: go to new activity
+        Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
+        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mainActivityIntent);
+        finish();
     }
 
     public void onFailureLoginTask(String error) {
-
+        mAuthTask = null;
+        showProgress(false);
     }
 }
 
