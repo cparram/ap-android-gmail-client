@@ -3,6 +3,8 @@ package cl.aleph.gmailclient;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -19,6 +21,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,8 +33,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -42,6 +53,9 @@ public class LoginActivity extends AppCompatActivity {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    public static final String USER_PREFERENCES = "USERPREFERENCES";
+    public static final String USER_EMAIL = "email";
+    public static final String USER_PASSWORD = "pass";
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -127,7 +141,7 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -178,45 +192,28 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public void onPostExecuteLoginTask() {
+        mAuthTask = null;
+        showProgress(false);
+    }
 
-        private final String mEmail;
-        private final String mPassword;
+    public void onCancelledLoginTask() {
+        mAuthTask = null;
+        showProgress(false);
+    }
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
+    public void onSuccessLoginTask() {
+        SharedPreferences sharedpreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(USER_EMAIL, mEmailView.getText().toString());
+        editor.putString(USER_EMAIL, mPasswordView.getText().toString());
+        editor.commit();
 
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            return true;
-        }
+        // TODO: go to new activity
+    }
 
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
+    public void onFailureLoginTask(String error) {
 
-            if (success) {
-                // TODO: show new activity
-            } else {
-                // TODO: get errors
-                // mPasswordView.setError(getString(R.string.error_incorrect_password));
-                // mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 }
 
