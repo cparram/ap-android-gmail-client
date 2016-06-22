@@ -128,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+            mPasswordView.setError(getString(R.string.error_password_too_short));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -159,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email.contains("@gmail.");
     }
 
     private boolean isPasswordValid(String password) {
@@ -224,6 +224,10 @@ public class LoginActivity extends AppCompatActivity {
     public void onFailureLoginTask(String error) {
         mAuthTask = null;
         showProgress(false);
+        if (error.startsWith("535-5.7.8")) {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            mPasswordView.requestFocus();
+        }
     }
 }
 
