@@ -32,6 +32,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -57,12 +59,14 @@ public class LoginActivity extends AppCompatActivity {
     public static final String USER_PREFERENCES = "cl.aleph.gmailclient.user.preferences";
     public static final String USER_EMAIL = "cl.aleph.gmailclient.user.preferences.email";
     public static final String USER_PASSWORD = "cl.aleph.gmailclient.user.preferences.pass";
+    public static final String USER_RETRIEVE_PROTOCOL = "cl.aleph.gmailclient.user.preferences.pass.retrieve_protocol";
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private RadioGroup mRetrieveProtocols;
     private SharedPreferences userPreferences;
 
     @Override
@@ -80,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mRetrieveProtocols = (RadioGroup)findViewById(R.id.retrieve_protocols);
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -210,9 +215,13 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onSuccessLoginTask() {
         mAuthTask = null;
+        int radioButtonID = mRetrieveProtocols.getCheckedRadioButtonId();
+        RadioButton radioButton = (RadioButton) mRetrieveProtocols.findViewById(radioButtonID);
         SharedPreferences.Editor editor = userPreferences.edit();
         editor.putString(USER_EMAIL, mEmailView.getText().toString());
         editor.putString(USER_PASSWORD, mPasswordView.getText().toString());
+        int protocol = radioButton.getText().toString() == "IMAP" ? EmailModel.IMAP : EmailModel.POP3;
+        editor.putInt(USER_RETRIEVE_PROTOCOL, protocol);
         editor.commit();
 
         Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
