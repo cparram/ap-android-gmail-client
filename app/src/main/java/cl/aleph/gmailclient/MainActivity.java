@@ -16,11 +16,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    SharedPreferences userPreferences;
+    private SharedPreferences userPreferences;
+    private List<EmailModel> emails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,11 @@ public class MainActivity extends AppCompatActivity
         TextView vUserEmail = (TextView) header.findViewById(R.id.user_email);
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
         vUserEmail.setText(userPreferences.getString(LoginActivity.USER_EMAIL, "default"));
+        ListView emailList = (ListView) findViewById(R.id.emailList);
+        emails = EmailModel.getHeaderEmails(10, userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP));
+        EmailAdapter adapter = new EmailAdapter(this, emails);
+        emailList.setAdapter(adapter);;
+
     }
 
     @Override
