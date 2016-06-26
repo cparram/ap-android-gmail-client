@@ -43,7 +43,7 @@ public class EmailAdapter extends ArrayAdapter<EmailModel> {
         }
         ViewHolder holder = (ViewHolder) view.getTag();
         holder.from.setText(emails.get(position).getFrom());
-        holder.subject.setText(emails.get(position).getSubject());
+        holder.subject.setText(emails.get(position).getJoinedSubject());
         holder.date.setText(emails.get(position).getDate());
         return view;
     }
