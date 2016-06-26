@@ -37,6 +37,13 @@
         </menu>
     </item>
     -->
+    <item android:title="@string/directories">
+        <menu>
+            <item
+                android:id="@+id/nav_dir_inbox"
+                android:title="@string/inbox" />
+        </menu>
+    </item>
     <item android:title="@string/count">
         <menu>
             <item

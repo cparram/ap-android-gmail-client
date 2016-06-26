@@ -23,5 +23,7 @@
     <string name="action_settings">Settings</string>
     <string name="log_out">Salir</string>
     <string name="count">Cuenta</string>
+    <string name="directories">Carpetas</string>
+    <string name="inbox">INBOX</string>
 
 </resources>

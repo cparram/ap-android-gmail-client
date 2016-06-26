@@ -1,8 +1,12 @@
 package cl.aleph.gmailclient;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,12 +20,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    SharedPreferences userPreferences;
-
+    private SharedPreferences userPreferences;
+    private List<EmailModel> emails;
+    private EmailListTask emailListTask;
+    private ListView emailList;
+    private View mProgressView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +62,47 @@ public class MainActivity extends AppCompatActivity
         // Set text of user email
         TextView vUserEmail = (TextView) header.findViewById(R.id.user_email);
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
-        vUserEmail.setText(userPreferences.getString(LoginActivity.USER_EMAIL, "default"));
+        String email = userPreferences.getString(LoginActivity.USER_EMAIL, "default");
+        vUserEmail.setText(email);
+        emailList = (ListView) findViewById(R.id.emailList);
+        mProgressView = findViewById(R.id.email_list_progress);
+        runEmailListTask();
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            emailList.setVisibility(show ? View.GONE : View.VISIBLE);
+            emailList.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    emailList.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            emailList.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override
@@ -96,8 +146,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_log_out) {
             logout();
-        } else {
-
+        } else if (id == R.id.nav_dir_inbox) {
+            runEmailListTask();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -113,5 +163,27 @@ public class MainActivity extends AppCompatActivity
         mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(mainActivityIntent);
         finish();
+    }
+
+    private void runEmailListTask() {
+        showProgress(true);
+        int protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP);
+        String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
+        String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
+        emailListTask = new EmailListTask(protocol, email, pass, this);
+        emailListTask.execute();
+    }
+
+    public void onPostExecuteEmailListTask(List<EmailModel> emails) {
+        this.emails = emails;
+        emailListTask = null;
+        showProgress(false);
+        EmailAdapter adapter = new EmailAdapter(this, this.emails);
+        emailList.setAdapter(adapter);
+    }
+
+    public void onCancelledEmailListTask() {
+        emailListTask = null;
+        showProgress(false);
     }
 }
