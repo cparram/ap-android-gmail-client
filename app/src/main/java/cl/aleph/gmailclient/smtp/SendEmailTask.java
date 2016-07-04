@@ -21,17 +21,19 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
     private final String password;
     private final String data;
     private final String subject;
+    private final String cc;
     private final ComposeEmailActivity listener;
     private SSLSocket sslsocket;
     private DataOutputStream os;
     private BufferedReader is;
 
-    public SendEmailTask(String from, String to, String password, String data, String subject, ComposeEmailActivity listener) {
+    public SendEmailTask(String from, String to, String password, String data, String subject, String cc, ComposeEmailActivity listener) {
         this.from = from;
         this.to = to;
         this.password = password;
         this.data = data;
         this.subject = subject;
+        this.cc = cc;
         this.listener = listener;
     }
 
@@ -60,9 +62,14 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
             readLine(is);
             write(String.format("RCPT TO:<%s>\r\n", to), os);
             readLine(is);
+            for(String email : cc.split(",")) {
+                write(String.format("RCPT TO:<%s>\r\n", email), os);
+                readLine(is);
+            }
             write("DATA\r\n", os);
             write(String.format("From: <%s>\r\n", from), os);
             write(String.format("To: <%s>\r\n", to), os);
+            write(String.format("Cc: %s\r\n", cc), os);
             write(String.format("Subject: %s\r\n", subject), os);
             write("\r\n", os);
             for(String line : data.split("\n")){

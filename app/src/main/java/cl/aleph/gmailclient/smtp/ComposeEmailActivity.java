@@ -26,6 +26,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
     private EditText emailTo;
     private EditText subject;
     private EditText data;
+    private EditText ccEmails;
     private View mProgressView;
     private View emailForm;
     @Override
@@ -39,32 +40,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String from = userPreferences.getString(LoginActivity.USER_EMAIL, null);
-                String password = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
-                String to = emailTo.getText().toString();
-                String _subject = subject.getText().toString();
-                String _data = data.getText().toString();
-                if (from == null || password == null) {
-                    //ToDO: send to login activity
-                }
-                boolean send = true;
-                if (TextUtils.isEmpty(to)) {
-                    emailTo.setError(getString(R.string.error_field_required));
-                    emailTo.requestFocus();
-                    send = false;
-                }
-                if (TextUtils.isEmpty(_subject)) {
-                    subject.setError(getString(R.string.error_field_required));
-                    subject.requestFocus();
-                    send = false;
-                }
-                if (TextUtils.isEmpty(_data)) {
-                    data.setError(getString(R.string.error_field_required));
-                    data.requestFocus();
-                    send = false;
-                }
-                if (send)
-                    sendEmail(from, to, password, _data, _subject);
+                sendEmail();
             }
         });
         emailTo = (EditText) findViewById(R.id.compose_email_to);
@@ -73,6 +49,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
         mProgressView = findViewById(R.id.send_email_progress);
         emailForm = findViewById(R.id.send_email_form);
+        ccEmails = (EditText) findViewById(R.id.compose_email_cc);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -110,16 +87,38 @@ public class ComposeEmailActivity extends AppCompatActivity {
 
     /**
      * Creates a send email task that will send the email
-     * @param from
-     * @param to
-     * @param password
-     * @param _data
-     * @param _subject
      */
-    private void sendEmail(String from, String to, String password, String _data, String _subject) {
-        showProgress(true);
-        sendEmailTask = new SendEmailTask(from, to, password, _data, _subject, this);
-        sendEmailTask.execute((Void) null);
+    private void sendEmail() {
+        String from = userPreferences.getString(LoginActivity.USER_EMAIL, null);
+        String password = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
+        String to = emailTo.getText().toString();
+        String _subject = subject.getText().toString();
+        String _data = data.getText().toString();
+        String cc = ccEmails.getText().toString();
+        if (from == null || password == null) {
+            //ToDO: send to login activity
+        }
+        boolean send = true;
+        if (TextUtils.isEmpty(to)) {
+            emailTo.setError(getString(R.string.error_field_required));
+            emailTo.requestFocus();
+            send = false;
+        }
+        if (TextUtils.isEmpty(_subject)) {
+            subject.setError(getString(R.string.error_field_required));
+            subject.requestFocus();
+            send = false;
+        }
+        if (TextUtils.isEmpty(_data)) {
+            data.setError(getString(R.string.error_field_required));
+            data.requestFocus();
+            send = false;
+        }
+        if (send) {
+            showProgress(true);
+            sendEmailTask = new SendEmailTask(from, to, password, _data, _subject, cc, this);
+            sendEmailTask.execute((Void) null);
+        }
     }
 
     /**
