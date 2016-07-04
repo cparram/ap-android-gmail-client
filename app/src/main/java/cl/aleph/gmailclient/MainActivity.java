@@ -25,6 +25,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cl.aleph.gmailclient.smtp.ComposeEmailActivity;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private SharedPreferences userPreferences;
@@ -43,8 +45,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent compose = new Intent(MainActivity.this, ComposeEmailActivity.class);
+                startActivity(compose);
             }
         });
 
