@@ -25,9 +25,13 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="orientation|screenSize"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".smtp.ComposeEmailActivity"
+            android:label="@string/title_activity_compose_email"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
