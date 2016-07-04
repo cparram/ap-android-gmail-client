@@ -13,7 +13,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * Created by root on 7/4/16.
+ * Created by cesar[dot]parramoreno[at]gmail[dot]com on 7/4/16.
  */
 public class SendEmailTask extends AsyncTask<Void, Void, String> {
     private final String from;
@@ -23,6 +23,8 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
     private final String subject;
     private final ComposeEmailActivity listener;
     private SSLSocket sslsocket;
+    private DataOutputStream os;
+    private BufferedReader is;
 
     public SendEmailTask(String from, String to, String password, String data, String subject, ComposeEmailActivity listener) {
         this.from = from;
@@ -42,8 +44,8 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
             String loginPlain = Base64.encodeToString(encode.getBytes(), Base64.NO_WRAP);
 
             sslsocket = (SSLSocket) factory.createSocket("smtp.gmail.com", 465);
-            DataOutputStream os = new DataOutputStream(sslsocket.getOutputStream());
-            BufferedReader is = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
+            os = new DataOutputStream(sslsocket.getOutputStream());
+            is = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
 
             readLine(is);
             write("HELO localhost\r\n", os);
@@ -80,12 +82,24 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
         return response;
     }
 
+    /**
+     * Writes bites through the socket and creates a log
+     * @param s
+     * @param os
+     * @throws IOException
+     */
     private void write(String s, DataOutputStream os) throws IOException {
         Log.i("smtp", "C: " + s.replace("\r\n", ""));
         os.writeBytes(s);
 
     }
 
+    /**
+     * Reads a line through the socket and creates a log
+     * @param is
+     * @return
+     * @throws IOException
+     */
     private String readLine(BufferedReader is) throws IOException {
         String response = is.readLine();
         Log.i("smtp", "S: " + response);
@@ -94,19 +108,6 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String response) {
-        //listener.onPostExecuteSuccess();
-    }
-
-    @Override
-    protected void onCancelled() {
-        // ToDo: close socket
-        if (!sslsocket.isClosed()){
-            try {
-                sslsocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //listener.onCancelledEmailListTask();
+        listener.onPostSend(response);
     }
 }

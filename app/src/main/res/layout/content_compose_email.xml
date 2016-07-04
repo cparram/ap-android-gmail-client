@@ -12,13 +12,21 @@
     tools:context="cl.aleph.gmailclient.smtp.ComposeEmailActivity"
     tools:showIn="@layout/activity_compose_email">
 
+    <ProgressBar
+        android:id="@+id/send_email_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
     <ScrollView
         android:id="@+id/compose_email_form"
         android:layout_width="match_parent"
         android:layout_height="432dp">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
+            android:id="@+id/send_email_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -69,6 +77,4 @@
 
         </LinearLayout>
     </ScrollView>
-
-
 </RelativeLayout>
