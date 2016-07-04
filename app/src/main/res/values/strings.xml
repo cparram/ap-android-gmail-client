@@ -25,5 +25,6 @@
     <string name="count">Cuenta</string>
     <string name="directories">Carpetas</string>
     <string name="inbox">INBOX</string>
+    <string name="title_activity_email_detail">EmailDetail</string>
 
 </resources>
