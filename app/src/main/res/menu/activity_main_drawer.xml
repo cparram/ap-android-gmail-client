@@ -52,4 +52,22 @@
                 android:title="@string/log_out" />
         </menu>
     </item>
+    <item android:title="IDLE"
+        android:visible="false">
+        <menu>
+            <group android:checkableBehavior="single"
+                >
+
+                <item
+                    android:id="@+id/activate_idle"
+                    android:title="Activado" />
+                <item
+                    android:id="@+id/deactivate_idle"
+                    android:title="Desactivado"
+                    android:checked="true" />
+
+            </group>
+        </menu>
+    </item>
+
 </menu>

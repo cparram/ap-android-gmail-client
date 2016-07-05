@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     private EmailListTask emailListTask;
     private ListView emailList;
     private View mProgressView;
+    private boolean IDLEActivated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +69,14 @@ public class MainActivity extends AppCompatActivity
         TextView vUserEmail = (TextView) header.findViewById(R.id.user_email);
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
         final String email = userPreferences.getString(LoginActivity.USER_EMAIL, "default");
+        Integer protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, -1);
+
+        if (protocol == EmailModel.IMAP) {
+            /* enable configuration of IDLE */
+            Menu menu = navigationView.getMenu();
+            MenuItem item = menu.getItem(2);
+            item.setVisible(true);
+        }
         vUserEmail.setText(email);
         emailList = (ListView) findViewById(R.id.emailList);
         // Event when click on one item, go to detail email activity
@@ -177,6 +186,10 @@ public class MainActivity extends AppCompatActivity
             logout();
         } else if (id == R.id.nav_dir_inbox) {
             runEmailListTask();
+        } else if (id == R.id.activate_idle) {
+            Log.i("idle", "activate");
+        } else if (id == R.id.deactivate_idle) {
+            Log.i("idle", "deactivate");
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
