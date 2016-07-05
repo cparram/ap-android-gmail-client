@@ -4,19 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 public class EmailDetailActivity extends AppCompatActivity {
     private EmailDetailTask emailDetailTask;
     private SharedPreferences userPreferences;
     private EmailDetail email;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +30,7 @@ public class EmailDetailActivity extends AppCompatActivity {
 
     }
 
-    private void runEmailDetailTask(String id){
+    private void runEmailDetailTask(String id) {
         int protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP);
         String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
         String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
@@ -43,12 +38,10 @@ public class EmailDetailActivity extends AppCompatActivity {
         emailDetailTask.execute();
     }
 
-    public void onPostExecuteEmailDetailTask(EmailDetail email){
+    public void onPostExecuteEmailDetailTask(EmailDetail email) {
         this.email = email;
-        Log.i("EMAIL FROM ACTIVITY: ", email.getBody());
         TextView body = (TextView) findViewById(R.id.body);
         body.setText(email.getBody());
-
     }
 
 }
