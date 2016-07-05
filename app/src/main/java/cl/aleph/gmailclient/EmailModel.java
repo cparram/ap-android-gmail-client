@@ -29,11 +29,13 @@ public class EmailModel {
     private String from;
     private List<String> subject;
     private String date;
+    private int id;
 
-    public EmailModel(String from, List<String> subject, String date) {
+    public EmailModel(String from, List<String> subject, String date, int id) {
         this.from = from;
         this.subject = subject;
         this.date = date;
+        this.id = id;
     }
 
     /**
@@ -90,7 +92,7 @@ public class EmailModel {
                 }
                 readLineUntilStartWith("TAG OK", is);
 
-                emails.add(new EmailModel(fields.get("From"), subjectValues, fields.get("Date")));
+                emails.add(new EmailModel(fields.get("From"), subjectValues, fields.get("Date"), initial));
                 initial --;
             }
             os.close();
@@ -129,4 +131,6 @@ public class EmailModel {
     }
 
     public String getDate() { return date; }
+
+    public int getId() { return id; }
 }

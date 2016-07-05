@@ -32,6 +32,19 @@
             android:name=".smtp.ComposeEmailActivity"
             android:label="@string/title_activity_compose_email"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+
+        <activity
+            android:name=".EmailDetailActivity"
+            android:label="@string/title_activity_email_detail"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cl.aleph.gmailclient.MainActivity" />
+        </activity>
+
+
     </application>
 
 </manifest>
