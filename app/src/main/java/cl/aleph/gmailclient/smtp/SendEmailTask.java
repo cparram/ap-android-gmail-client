@@ -22,18 +22,21 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
     private final String data;
     private final String subject;
     private String cc;
+    private String cco;
     private final ComposeEmailActivity listener;
     private SSLSocket sslsocket;
     private DataOutputStream os;
     private BufferedReader is;
 
-    public SendEmailTask(String from, String to, String password, String data, String subject, String cc, ComposeEmailActivity listener) {
+    public SendEmailTask(String from, String to, String password, String data, String subject,
+                         String cc, String cco, ComposeEmailActivity listener) {
         this.from = from;
         this.to = to;
         this.password = password;
         this.data = data;
         this.subject = subject;
         this.cc = cc;
+        this.cco = cco;
         this.listener = listener;
     }
 
@@ -42,6 +45,7 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
         SSLSocketFactory factory=(SSLSocketFactory) SSLSocketFactory.getDefault();
         String response = null;
         cc = cc.replace(" ", "");
+        cco = cco.replace(" ", "");
         try {
             String encode = "\000"+ from +"\000"+ password;
             String loginPlain = Base64.encodeToString(encode.getBytes(), Base64.NO_WRAP);
@@ -67,10 +71,15 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
                 write(String.format("RCPT TO:<%s>\r\n", email), os);
                 readLine(is);
             }
+            for(String email : cco.split(",")) {
+                write(String.format("RCPT TO:<%s>\r\n", email), os);
+                readLine(is);
+            }
             write("DATA\r\n", os);
             write(String.format("From: <%s>\r\n", from), os);
             write(String.format("To: <%s>\r\n", to), os);
             write(String.format("Cc: %s\r\n", cc), os);
+            write(String.format("Cco: %s\r\n", cco), os);
             write(String.format("Subject: %s\r\n", subject), os);
             write("\r\n", os);
             for(String line : data.split("\n")){

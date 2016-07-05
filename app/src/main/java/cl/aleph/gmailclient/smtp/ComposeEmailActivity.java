@@ -27,6 +27,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
     private EditText subject;
     private EditText data;
     private EditText ccEmails;
+    private EditText ccoEmails;
     private View mProgressView;
     private View emailForm;
     @Override
@@ -50,6 +51,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.send_email_progress);
         emailForm = findViewById(R.id.send_email_form);
         ccEmails = (EditText) findViewById(R.id.compose_email_cc);
+        ccoEmails = (EditText) findViewById(R.id.compose_email_cco);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -95,6 +97,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         String _subject = subject.getText().toString();
         String _data = data.getText().toString();
         String cc = ccEmails.getText().toString();
+        String cco = ccoEmails.getText().toString();
         if (from == null || password == null) {
             //ToDO: send to login activity
         }
@@ -116,7 +119,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         }
         if (send) {
             showProgress(true);
-            sendEmailTask = new SendEmailTask(from, to, password, _data, _subject, cc, this);
+            sendEmailTask = new SendEmailTask(from, to, password, _data, _subject, cc, cco, this);
             sendEmailTask.execute((Void) null);
         }
     }
