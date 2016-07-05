@@ -21,7 +21,7 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
     private final String password;
     private final String data;
     private final String subject;
-    private final String cc;
+    private String cc;
     private final ComposeEmailActivity listener;
     private SSLSocket sslsocket;
     private DataOutputStream os;
@@ -41,6 +41,7 @@ public class SendEmailTask extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... voids) {
         SSLSocketFactory factory=(SSLSocketFactory) SSLSocketFactory.getDefault();
         String response = null;
+        cc = cc.replace(" ", "");
         try {
             String encode = "\000"+ from +"\000"+ password;
             String loginPlain = Base64.encodeToString(encode.getBytes(), Base64.NO_WRAP);
