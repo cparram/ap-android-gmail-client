@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     private EmailListTask emailListTask;
     private ListView emailList;
     private View mProgressView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,9 +67,25 @@ public class MainActivity extends AppCompatActivity
         // Set text of user email
         TextView vUserEmail = (TextView) header.findViewById(R.id.user_email);
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
-        String email = userPreferences.getString(LoginActivity.USER_EMAIL, "default");
+        final String email = userPreferences.getString(LoginActivity.USER_EMAIL, "default");
         vUserEmail.setText(email);
         emailList = (ListView) findViewById(R.id.emailList);
+        // Event when click on one item, go to detail email activity
+        emailList.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        EmailModel item = (EmailModel) parent.getItemAtPosition(position);
+                        Intent intent = new Intent(MainActivity.this, EmailDetailActivity.class);
+                        // put id of email in extra intent, necessary to get the details
+                        intent.putExtra("from", item.getFrom());
+                        intent.putExtra("date", item.getDate());
+                        intent.putExtra("subject", item.getJoinedSubject());
+                        intent.putExtra("id", Integer.toString(item.getId()));
+                        startActivity(intent);
+                    }
+                }
+        );
         mProgressView = findViewById(R.id.email_list_progress);
         runEmailListTask();
         Bundle extras = getIntent().getExtras();
@@ -197,4 +215,5 @@ public class MainActivity extends AppCompatActivity
         emailListTask = null;
         showProgress(false);
     }
+
 }
