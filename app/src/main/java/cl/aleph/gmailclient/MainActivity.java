@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity
                         EmailModel item = (EmailModel) parent.getItemAtPosition(position);
                         Intent intent = new Intent(MainActivity.this, EmailDetailActivity.class);
                         // put id of email in extra intent, necessary to get the details
+                        intent.putExtra("from", item.getFrom());
+                        intent.putExtra("date", item.getDate());
+                        intent.putExtra("subject", item.getJoinedSubject());
                         intent.putExtra("id", Integer.toString(item.getId()));
                         startActivity(intent);
                     }

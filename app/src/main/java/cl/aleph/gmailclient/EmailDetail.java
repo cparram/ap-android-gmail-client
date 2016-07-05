@@ -32,7 +32,7 @@ public class EmailDetail {
         this.body = body;
     }
 
-    public static EmailDetail getEmailDetails(String email, String pass, String id) {
+    public static EmailDetail getEmailDetails(String email, String pass, String id, String from, String subject, String date) {
         EmailDetail emailDetail = null;
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         try {
@@ -45,10 +45,10 @@ public class EmailDetail {
             write(IMAP, "TAG SELECT \"INBOX\"\r\n", os);
             readLineUntilStartWith("TAG OK", is);
             write(IMAP, "TAG FETCH " + id + " BODY[TEXT]\r\n", os);
-            String line = readLine(IMAP, is);
+            readLine(IMAP, is);
             String body = "";
-            // Skip the first line (GMAIL response stuff)
-            line = "";
+            // Skip the first line (GMAIL response not necessary stuff)
+            String line = "";
             while (!line.startsWith("TAG OK")) {
                 body += line;
                 body += "\n";
@@ -57,7 +57,7 @@ public class EmailDetail {
             os.close();
             is.close();
             sslsocket.close();
-            emailDetail = new EmailDetail("from", "subject", "date", body);
+            emailDetail = new EmailDetail(from, subject, date, body);
         } catch (IOException e) {
             e.printStackTrace();
         }

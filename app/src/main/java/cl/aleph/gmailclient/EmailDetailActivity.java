@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.TextView;
 
 public class EmailDetailActivity extends AppCompatActivity {
@@ -25,23 +26,35 @@ public class EmailDetailActivity extends AppCompatActivity {
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
         Intent intent = getIntent();
         String id = intent.getStringExtra("id");
+        String from = intent.getStringExtra("from");
+        String subject = intent.getStringExtra("subject");
+        String date = intent.getStringExtra("date");
 
-        runEmailDetailTask(id);
+        runEmailDetailTask(id, from, subject, date);
 
     }
 
-    private void runEmailDetailTask(String id) {
+    private void runEmailDetailTask(String id, String from, String subject, String date) {
         int protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP);
         String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
         String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
-        emailDetailTask = new EmailDetailTask(protocol, email, pass, id, this);
+        emailDetailTask = new EmailDetailTask(protocol, email, pass, id, from, subject, date,this);
         emailDetailTask.execute();
     }
 
     public void onPostExecuteEmailDetailTask(EmailDetail email) {
         this.email = email;
+        Log.i("From: ", email.getFrom());
+        Log.i("Subject: ", email.getSubject());
+        Log.i("Date: ", email.getDate());
         TextView body = (TextView) findViewById(R.id.body);
+        TextView from = (TextView) findViewById(R.id.from);
+        TextView subject = (TextView) findViewById(R.id.subject);
+        TextView date = (TextView) findViewById(R.id.date);
         body.setText(email.getBody());
+        from.setText(email.getFrom());
+        subject.setText(email.getSubject());
+        date.setText(email.getDate());
     }
 
 }
