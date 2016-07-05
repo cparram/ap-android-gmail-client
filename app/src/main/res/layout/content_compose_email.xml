@@ -40,7 +40,7 @@
                     android:id="@+id/compose_email_to"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Para"
+                    android:hint="Para:"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -54,7 +54,7 @@
                     android:id="@+id/compose_email_subject"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Asunto"
+                    android:hint="Asunto:"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -68,7 +68,21 @@
                     android:id="@+id/compose_email_cc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="CC"
+                    android:hint="CC:"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+            </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/compose_email_cco"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="CCO:"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -82,7 +96,7 @@
                     android:layout_height="match_parent"
                     android:inputType="textMultiLine"
                     android:ems="10"
-                    android:hint="Datos"
+                    android:hint="Mensaje:"
                     android:id="@+id/compose_email_data"
                     android:layout_alignBottom="@+id/compose_email_form"
                     android:layout_alignParentLeft="true"
