@@ -44,9 +44,6 @@ public class EmailDetailActivity extends AppCompatActivity {
 
     public void onPostExecuteEmailDetailTask(EmailDetail email) {
         this.email = email;
-        Log.i("From: ", email.getFrom());
-        Log.i("Subject: ", email.getSubject());
-        Log.i("Date: ", email.getDate());
         TextView body = (TextView) findViewById(R.id.body);
         TextView from = (TextView) findViewById(R.id.from);
         TextView subject = (TextView) findViewById(R.id.subject);

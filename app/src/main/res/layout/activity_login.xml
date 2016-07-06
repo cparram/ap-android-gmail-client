@@ -74,6 +74,11 @@
                     android:layout_height="wrap_content"
                     android:text="IMAP"
                     android:checked="true" />
+                <RadioButton android:id="@+id/pop3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="POP3"
+                    android:checked="false" />
             </RadioGroup>
 
             <Button
