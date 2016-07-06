@@ -126,7 +126,7 @@ public class EmailModel {
                 } else {
                     finish = 1;
                 }
-                while (finish != initial) {
+                while (finish <= initial) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("TOP ");
                     sb.append(Integer.toString(initial));
