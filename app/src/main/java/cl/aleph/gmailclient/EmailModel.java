@@ -49,7 +49,6 @@ public class EmailModel {
     public static List<EmailModel> getHeaderEmails(int count, int protocol, String email, String pass) {
         List<EmailModel> emails = new ArrayList<>(count);
         // dummy values
-        Log.i("PROTOCOL", Integer.toString(protocol));
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         String msg = null;
         if (protocol == EmailModel.IMAP) {
@@ -58,16 +57,16 @@ public class EmailModel {
                 DataOutputStream os = new DataOutputStream(sslsocket.getOutputStream());
                 BufferedReader is = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
                 readLineUntilStartWith(protocol, "* OK", is);
-                write(IMAP, "TAG LOGIN " + email + " " + pass + "\r\n", os);
+                write(protocol, "TAG LOGIN " + email + " " + pass + "\r\n", os);
                 readLineUntilStartWith(protocol, "TAG OK", is);
-                write(IMAP, "TAG SELECT \"INBOX\"\r\n", os);
+                write(protocol, "TAG SELECT \"INBOX\"\r\n", os);
                 int emailCount = 0;
-                msg = readLine(IMAP, is);
+                msg = readLine(protocol, is);
                 while (!msg.startsWith("TAG OK")) {
                     if (msg.endsWith("EXISTS")) {
                         emailCount = Integer.parseInt(msg.split("\\s")[1]);
                     }
-                    msg = readLine(IMAP, is);
+                    msg = readLine(protocol, is);
                 }
                 int finish = emailCount - count < 0 ? 0 : emailCount - count;
                 int initial = emailCount;
@@ -75,23 +74,23 @@ public class EmailModel {
                     Map<String, String> fields = new HashMap<>();
                     String[] headerFields = new String[]{"FROM", "DATE"};
                     for (String field : headerFields) {
-                        write(IMAP, String.format("TAG FETCH %d (BODY[HEADER.FIELDS (%s)])\r\n", initial, field), os);
-                        readLine(IMAP, is);
+                        write(protocol, String.format("TAG FETCH %d (BODY[HEADER.FIELDS (%s)])\r\n", initial, field), os);
+                        readLine(protocol, is);
                         String _field = field.substring(0, 1).toUpperCase() + field.substring(1).toLowerCase();
-                        fields.put(_field, readLine(IMAP, is).split(_field + ":")[1]);
+                        fields.put(_field, readLine(protocol, is).split(_field + ":")[1]);
                         readLineUntilStartWith(protocol, "TAG OK", is);
                     }
                     // Subject value can be more than one line with different encodes
                     List<String> subjectValues = new LinkedList<>();
-                    write(IMAP, String.format("TAG FETCH %d BODY[HEADER.FIELDS (SUBJECT)]\r\n", initial), os);
-                    readLine(IMAP, is);
-                    msg = readLine(IMAP, is).split("Subject:")[1];
+                    write(protocol, String.format("TAG FETCH %d BODY[HEADER.FIELDS (SUBJECT)]\r\n", initial), os);
+                    readLine(protocol, is);
+                    msg = readLine(protocol, is).split("Subject:")[1];
                     subjectValues.add(msg);
 
-                    msg = readLine(IMAP, is);
+                    msg = readLine(protocol, is);
                     while (!msg.equals(")")) {
                         subjectValues.add(msg);
-                        msg = readLine(IMAP, is);
+                        msg = readLine(protocol, is);
                     }
                     readLineUntilStartWith(protocol, "TAG OK", is);
 
@@ -105,8 +104,7 @@ public class EmailModel {
                 e.printStackTrace();
             }
             return emails;
-        } else {
-            Log.i("SELECTED", "POP3");
+        } else if(protocol == EmailModel.POP3) {
             try {
                 SSLSocket sslsocket = (SSLSocket) factory.createSocket(POP3_URL, POP3_PORT);
                 DataOutputStream os = new DataOutputStream(sslsocket.getOutputStream());
@@ -121,7 +119,6 @@ public class EmailModel {
                 String stat = readLine(protocol, is);
                 String[] split = stat.split(" ");
                 int emailCount = Integer.parseInt(split[1]);
-                Log.i("EMAIL COUNT", Integer.toString(emailCount));
                 int finish;
                 int initial = emailCount;
                 if (emailCount > count) {
@@ -170,6 +167,8 @@ public class EmailModel {
             }
             return emails;
         }
+
+        return emails;
     }
 
     private static void write(int protocol, String msg, DataOutputStream os) throws IOException {

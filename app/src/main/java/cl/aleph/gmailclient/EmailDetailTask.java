@@ -32,7 +32,7 @@ public class EmailDetailTask extends AsyncTask<Void, Void, EmailDetail> {
 
     @Override
     protected EmailDetail doInBackground(Void... voids) {
-        return EmailDetail.getEmailDetails(email, pass, id, from, subject, date);
+        return EmailDetail.getEmailDetails(email, pass, id, from, subject, date, protocol);
     }
 
     @Override
