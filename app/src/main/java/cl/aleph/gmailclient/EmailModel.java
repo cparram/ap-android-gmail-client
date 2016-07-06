@@ -143,17 +143,11 @@ public class EmailModel {
                         if (msg.startsWith("Date:")) {
                             date = msg.split("Date:")[1];
                             allSet++;
-                        } else if (msg.startsWith("From: ")) {
+                        } else if (msg.startsWith("From:")) {
                             from = msg.split("From:")[1];
                             allSet++;
-                        } else if (msg.startsWith("Subject: ")) {
+                        } else if (msg.startsWith("Subject:")) {
                             subjectValues.add(msg.split("Subject:")[1]);
-                            msg = readLine(protocol, is);
-                            // TODO: FIX THIS!!! NO ALWAYS START WITH =?UTF-8?
-                            while (msg.startsWith("=?UTF-8?")) {
-                                subjectValues.add(msg);
-                                msg = readLine(protocol, is);
-                            }
                             allSet++;
                         }
                     }
