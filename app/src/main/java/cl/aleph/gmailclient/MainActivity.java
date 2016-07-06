@@ -6,11 +6,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,19 +24,22 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import cl.aleph.gmailclient.imap.*;
 import cl.aleph.gmailclient.smtp.ComposeEmailActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String DEFAULT_MESSAGE = "cl.aleph.gmailclient.default_message";
     private SharedPreferences userPreferences;
-    private List<EmailModel> emails;
-    private EmailListTask emailListTask;
+    private List<EmailModel> emails = new ArrayList<>();
+    private cl.aleph.gmailclient.imap.EmailListTask emailListTask;
     private ListView emailList;
     private View mProgressView;
-    private boolean IDLEActivated = false;
+    private IDLETask idleTask; /* Only to IMAP */
+    private EmailAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +72,15 @@ public class MainActivity extends AppCompatActivity
         TextView vUserEmail = (TextView) header.findViewById(R.id.user_email);
         userPreferences = getSharedPreferences(LoginActivity.USER_PREFERENCES, Context.MODE_PRIVATE);
         final String email = userPreferences.getString(LoginActivity.USER_EMAIL, "default");
+        String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
         Integer protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, -1);
 
         if (protocol == EmailModel.IMAP) {
             /* enable configuration of IDLE */
             Menu menu = navigationView.getMenu();
-            MenuItem item = menu.getItem(2);
+            MenuItem item = menu.getItem(1);
             item.setVisible(true);
+
         }
         vUserEmail.setText(email);
         emailList = (ListView) findViewById(R.id.emailList);
@@ -95,8 +100,16 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
         );
+
+        adapter = new EmailAdapter(this, this.emails);
+        emailList.setAdapter(adapter);
         mProgressView = findViewById(R.id.email_list_progress);
         runEmailListTask();
+        // Start idle task
+        idleTask = new IDLETask(email, pass, this);
+        idleTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        // Display messages from intent
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String value = extras.getString(DEFAULT_MESSAGE);
@@ -118,14 +131,14 @@ public class MainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            emailList.setVisibility(show ? View.GONE : View.VISIBLE);
+            /*emailList.setVisibility(show ? View.GONE : View.VISIBLE);
             emailList.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     emailList.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
-            });
+            });*/
 
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mProgressView.animate().setDuration(shortAnimTime).alpha(
@@ -139,7 +152,7 @@ public class MainActivity extends AppCompatActivity
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            emailList.setVisibility(show ? View.GONE : View.VISIBLE);
+            //emailList.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -148,6 +161,9 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (emailListTask != null) {
+            emailListTask.cancel(true);
+            emailListTask = null;
         } else {
             super.onBackPressed();
         }
@@ -186,16 +202,22 @@ public class MainActivity extends AppCompatActivity
             logout();
         } else if (id == R.id.nav_dir_inbox) {
             runEmailListTask();
-        } else if (id == R.id.activate_idle) {
-            Log.i("idle", "activate");
-        } else if (id == R.id.deactivate_idle) {
-            Log.i("idle", "deactivate");
+        } else if (id == R.id.toogle_idle) {
+            if (idleTask != null) {
+                idleTask.canceled = !idleTask.canceled;
+                if (idleTask.canceled)
+                    item.setTitle("Desactivado");
+                else
+                    item.setTitle("Activado");
+            }
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     private void logout() {
         SharedPreferences.Editor editor = userPreferences.edit();
@@ -208,20 +230,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void runEmailListTask() {
+        this.emails.clear(); // remove all emails
+        adapter.notifyDataSetChanged(); // refresh view
+
         showProgress(true);
-        int protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP);
         String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
         String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
-        emailListTask = new EmailListTask(protocol, email, pass, this);
-        emailListTask.execute();
+        emailListTask = new cl.aleph.gmailclient.imap.EmailListTask(email, pass, this) ;
+        emailListTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void onPostExecuteEmailListTask(List<EmailModel> emails) {
-        this.emails = emails;
+    public void onPostExecuteEmailListTask() {
         emailListTask = null;
+        // Update list view
+        adapter.notifyDataSetChanged();
+        // Remove progress bar
         showProgress(false);
-        EmailAdapter adapter = new EmailAdapter(this, this.emails);
-        emailList.setAdapter(adapter);
     }
 
     public void onCancelledEmailListTask() {
@@ -229,4 +253,12 @@ public class MainActivity extends AppCompatActivity
         showProgress(false);
     }
 
+    /**
+     * Insert new email at the beginning of the list
+     * @param email
+     */
+    public void putNewEmail(EmailModel email) {
+        this.emails.add(email); // Update list of emails
+        adapter.notifyDataSetChanged(); // Update list view
+    }
 }
