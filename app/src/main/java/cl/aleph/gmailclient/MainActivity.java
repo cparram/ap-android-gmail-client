@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cl.aleph.gmailclient.imap.*;
+import cl.aleph.gmailclient.imap.EmailListTask;
 import cl.aleph.gmailclient.smtp.ComposeEmailActivity;
 
 public class MainActivity extends AppCompatActivity
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity
     public static final String DEFAULT_MESSAGE = "cl.aleph.gmailclient.default_message";
     private SharedPreferences userPreferences;
     private List<EmailModel> emails = new ArrayList<>();
-    private cl.aleph.gmailclient.imap.EmailListTask emailListTask;
+    private Object emailListTask;
     private ListView emailList;
     private View mProgressView;
     private IDLETask idleTask; /* Only to IMAP */
@@ -161,8 +162,8 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (emailListTask != null) {
-            emailListTask.cancel(true);
+        } else if (emailListTask != null && emailListTask instanceof cl.aleph.gmailclient.imap.EmailListTask) {
+            ((cl.aleph.gmailclient.imap.EmailListTask) emailListTask).cancel(true);
             emailListTask = null;
         } else {
             super.onBackPressed();
@@ -236,8 +237,16 @@ public class MainActivity extends AppCompatActivity
         showProgress(true);
         String pass = userPreferences.getString(LoginActivity.USER_PASSWORD, null);
         String email = userPreferences.getString(LoginActivity.USER_EMAIL, null);
-        emailListTask = new cl.aleph.gmailclient.imap.EmailListTask(email, pass, this) ;
-        emailListTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        int protocol = userPreferences.getInt(LoginActivity.USER_RETRIEVE_PROTOCOL, EmailModel.IMAP);
+        if (protocol == EmailModel.IMAP) {
+            emailListTask = new cl.aleph.gmailclient.imap.EmailListTask(email, pass, this);
+            ((cl.aleph.gmailclient.imap.EmailListTask)emailListTask).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            emailListTask = new cl.aleph.gmailclient.EmailListTask(protocol, email, pass, this);
+            ((cl.aleph.gmailclient.EmailListTask)emailListTask).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+
     }
 
     public void onPostExecuteEmailListTask() {
@@ -245,6 +254,14 @@ public class MainActivity extends AppCompatActivity
         // Update list view
         adapter.notifyDataSetChanged();
         // Remove progress bar
+        showProgress(false);
+    }
+
+    public void onPostExecuteEmailListTask(List<EmailModel> emails) {
+        this.emails.clear();
+        this.emails.addAll(emails);
+        emailListTask = null;
+        adapter.notifyDataSetChanged();
         showProgress(false);
     }
 
@@ -257,8 +274,14 @@ public class MainActivity extends AppCompatActivity
      * Insert new email at the beginning of the list
      * @param email
      */
-    public void putNewEmail(EmailModel email) {
-        this.emails.add(email); // Update list of emails
+    public void putNewEmail(EmailModel email, int position) {
+        // Update list of emails
+        if (position == -1)
+            this.emails.add(email);
+        else
+            this.emails.add(position, email);
         adapter.notifyDataSetChanged(); // Update list view
     }
+
+
 }

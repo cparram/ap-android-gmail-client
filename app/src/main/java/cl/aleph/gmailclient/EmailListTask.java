@@ -29,11 +29,6 @@ public class EmailListTask extends AsyncTask<Void, Void, List<EmailModel>> {
 
     @Override
     protected void onPostExecute(final List<EmailModel> emails) {
-        listener.onPostExecuteEmailListTask();
-    }
-
-    @Override
-    protected void onCancelled() {
-        listener.onCancelledEmailListTask();
+        listener.onPostExecuteEmailListTask(emails);
     }
 }
