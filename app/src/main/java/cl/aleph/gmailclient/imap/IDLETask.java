@@ -44,7 +44,7 @@ public class IDLETask extends BaseIMAPTask {
             write("TAG IDLE\r\n", os);
             readLine(is);
             while((msg = readLine(is)) != null){
-                if (!canceled) {
+                if (!canceled && msg.endsWith("EXISTS")) {
                     int emailIndex = Integer.parseInt(msg.split("\\s")[1]);
                     publishProgress(getNewEmail(emailIndex));
                 }
