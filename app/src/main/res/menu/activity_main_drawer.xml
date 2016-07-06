@@ -44,6 +44,19 @@
                 android:title="@string/inbox" />
         </menu>
     </item>
+    <item android:title="IDLE"
+        android:visible="false">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/toogle_idle"
+                    android:title="Desactivado"
+                    android:checkable="true"
+                    android:checked="true"/>
+
+            </group>
+        </menu>
+    </item>
     <item android:title="@string/count">
         <menu>
             <item
@@ -52,4 +65,5 @@
                 android:title="@string/log_out" />
         </menu>
     </item>
+
 </menu>

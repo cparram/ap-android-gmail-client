@@ -12,14 +12,6 @@
     tools:context="cl.aleph.gmailclient.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <!-- Email list progress -->
-    <ProgressBar
-        android:id="@+id/email_list_progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
 
     <ListView
         android:layout_width="wrap_content"
@@ -27,4 +19,16 @@
         android:id="@+id/emailList"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <!-- Email list progress -->
+    <ProgressBar
+        android:id="@+id/email_list_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>
