@@ -220,7 +220,9 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = userPreferences.edit();
         editor.putString(USER_EMAIL, mEmailView.getText().toString());
         editor.putString(USER_PASSWORD, mPasswordView.getText().toString());
-        int protocol = radioButton.getText().toString() == "IMAP" ? EmailModel.IMAP : EmailModel.POP3;
+        Log.i("Radio Button", radioButton.getText().toString());
+        int protocol = radioButton.getText().toString().equals("IMAP") ? EmailModel.IMAP : EmailModel.POP3;
+        Log.i("Protocol Login: ", Integer.toString(protocol));
         editor.putInt(USER_RETRIEVE_PROTOCOL, protocol);
         editor.commit();
 
