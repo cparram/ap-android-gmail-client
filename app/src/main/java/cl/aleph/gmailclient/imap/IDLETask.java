@@ -57,7 +57,7 @@ public class IDLETask extends BaseIMAPTask {
 
     @Override
     protected void onProgressUpdate(EmailModel... values) {
-        listener.putNewEmail(values[0]);
+        listener.putNewEmail(values[0], 0);
     }
 
 }

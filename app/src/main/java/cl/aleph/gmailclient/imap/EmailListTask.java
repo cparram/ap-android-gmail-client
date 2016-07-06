@@ -67,7 +67,7 @@ public class EmailListTask extends BaseIMAPTask {
 
     @Override
     protected void onProgressUpdate(EmailModel... values) {
-        listener.putNewEmail(values[0]);
+        listener.putNewEmail(values[0], -1);
     }
 
     @Override
